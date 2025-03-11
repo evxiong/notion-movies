@@ -1,0 +1,21 @@
+{
+  "name": "notion-movies",
+  "version": "0.1.0",
+  "description": "Movie tracker integration for Notion",
+  "license": "MIT",
+  "author": "Evan Xiong",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "npm run build && npm run start",
+    "lint": "eslint src/**/*.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "eslint": "^9.22.0",
+    "globals": "^16.0.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.1"
+  }
+}
