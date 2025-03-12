@@ -1,3 +1,4 @@
+import { getIMDbPoster } from "./imdb";
 import type { MovieInfo, TMDBMovieResponse, TMDBSearchResponse } from "./types";
 
 export async function getMovieInfo(
@@ -11,7 +12,6 @@ export async function getMovieInfo(
     // Search for movie by title and year
     const r1 = await fetch(searchUrl);
     const searchResponse: TMDBSearchResponse = await r1.json();
-    console.log(searchResponse);
     if (searchResponse.total_results === 0) {
       return null;
     }
@@ -21,17 +21,19 @@ export async function getMovieInfo(
     const movieUrl = `https://api.themoviedb.org/3/movie/${movieId}?language=en-US&api_key=${process.env.TMDB_API_KEY}`;
     const r2 = await fetch(movieUrl);
     const movieResponse: TMDBMovieResponse = await r2.json();
-    console.log(movieResponse);
     const mins = movieResponse.runtime;
     const m = mins % 60;
     const h = (mins / 60) >> 0;
+
+    // Get IMDb poster link
+    const imdbPosterLink = await getIMDbPoster(movieResponse.imdb_id);
 
     // Return MovieInfo object
     const movie: MovieInfo = {
       runtime: h + "h " + m + "m",
       posterLink:
-        "https://image.tmdb.org/t/p/w500" +
-        searchResponse.results[0].poster_path,
+        imdbPosterLink ??
+        "https://image.tmdb.org/t/p/w400" + movieResponse.poster_path,
     };
     return movie;
   } catch (e) {

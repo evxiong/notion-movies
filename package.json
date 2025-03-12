@@ -20,6 +20,8 @@
   },
   "dependencies": {
     "@notionhq/client": "^2.2.16",
-    "dotenv": "^16.4.7"
+    "@types/jsdom": "^21.1.7",
+    "dotenv": "^16.4.7",
+    "jsdom": "^26.0.0"
   }
 }

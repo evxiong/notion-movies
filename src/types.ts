@@ -3,6 +3,12 @@ export interface MovieInfo {
   posterLink: string; // link to poster
 }
 
+export interface NotionMovie {
+  id: string; // page id
+  title: string;
+  year: number;
+}
+
 export interface TMDBSearchResponse {
   page: number;
   total_pages: number;
