@@ -1,9 +1,13 @@
 import type { Client } from "@notionhq/client";
-import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+import type {
+  BlockObjectResponse,
+  PageObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 import type { MovieInfo, NotionMovie } from "./types";
 
 export async function getNotionMovies(
-  notion: Client
+  notion: Client,
+  databaseId: string
 ): Promise<NotionMovie[] | null> {
   // Get all pages in Notion db.
   try {
@@ -13,7 +17,7 @@ export async function getNotionMovies(
     while (hasMore) {
       const response = await notion.databases.query({
         start_cursor: nextCursor,
-        database_id: process.env.NOTION_DATABASE_ID!,
+        database_id: databaseId,
         filter: {
           property: "Info Added",
           checkbox: {
@@ -110,4 +114,23 @@ export async function updateNotionMovie(
   } catch (e) {
     console.error(e);
   }
+}
+
+export async function getNotionDatabaseId(
+  notion: Client,
+  pageId: string
+): Promise<string | null> {
+  // Get child database id from top-level page
+  try {
+    const response = await notion.blocks.children.list({
+      block_id: pageId,
+    });
+    const databaseId = (response.results as BlockObjectResponse[]).find(
+      (r) => r.type === "child_database"
+    )?.id;
+    return databaseId ?? null;
+  } catch (e) {
+    console.error(e);
+  }
+  return null;
 }

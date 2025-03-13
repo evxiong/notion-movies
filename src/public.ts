@@ -1,15 +1,26 @@
 import { Client } from "@notionhq/client";
-import dotenv from "dotenv";
+import {
+  getNotionDatabaseId,
+  getNotionMovies,
+  updateNotionMovie,
+} from "./notion";
 import { getMovieInfo } from "./tmdb";
-import { getNotionMovies, updateNotionMovie } from "./notion";
 
-dotenv.config();
+export async function runPublicIntegration(
+  pageId: string,
+  accessToken: string
+): Promise<boolean> {
+  // Run public integration. Return false if Notion error.
+  const notion = new Client({ auth: accessToken });
 
-async function main() {
-  const notion = new Client({ auth: process.env.NOTION_KEY });
-  const results = await getNotionMovies(notion);
+  const databaseId = await getNotionDatabaseId(notion, pageId);
+  if (databaseId === null) {
+    return false;
+  }
+
+  const results = await getNotionMovies(notion, databaseId);
   if (results === null) {
-    return;
+    return false;
   }
 
   console.log(`Updating ${results.length} movies...\n`);
@@ -27,6 +38,5 @@ async function main() {
   }
 
   console.log("Done");
+  return true;
 }
-
-main();
