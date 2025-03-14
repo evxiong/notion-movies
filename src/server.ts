@@ -113,8 +113,8 @@ app.get("/auth", async (req, res) => {
       const { owner, ...d } = response;
       d.user_id = owner.user.id;
 
-      // Upsert new connection
-      const result = await users.updateOne(
+      // Replace or insert new connection
+      const result = await users.replaceOne(
         {
           bot_id: d.bot_id,
           access_token: d.access_token,

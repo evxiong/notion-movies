@@ -143,6 +143,7 @@ export async function getNotionPageUrl(
 ): Promise<string | null> {
   try {
     const response = await notion.pages.retrieve({ page_id: pageId });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const url = (response as any).url as string;
     return url;
   } catch (e) {
