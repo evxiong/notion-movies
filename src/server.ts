@@ -2,6 +2,8 @@ import express from "express";
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
 import { runPublicIntegration } from "./public";
+import { getNotionPageUrl } from "./notion";
+import { Client } from "@notionhq/client";
 
 dotenv.config();
 
@@ -24,6 +26,15 @@ app.post("/", async (req, res) => {
   const payload = req.body;
   const userId = payload.source.user_id;
   const pageId = payload.data.id;
+  console.log(`user_id: ${userId}\npage_id: ${pageId}`);
+
+  if (!userId || !pageId) {
+    res
+      .status(400)
+      .send("Failed to complete POST request. Malformed request syntax.");
+    return;
+  }
+
   try {
     // Query database for appropriate token, using user id and page id
     const users = client.db("notion").collection("users");
@@ -69,8 +80,6 @@ app.get("/auth", async (req, res) => {
     }
     if (req.query.code) {
       // Send POST request for access token, using temp auth code
-      console.log(req.query.code);
-
       const encoded = Buffer.from(
         `${process.env.OAUTH_CLIENT_ID}:${process.env.OAUTH_CLIENT_SECRET}`
       ).toString("base64");
@@ -91,18 +100,45 @@ app.get("/auth", async (req, res) => {
 
       const r = await fetch("https://api.notion.com/v1/oauth/token", options);
       const response = await r.json();
-      console.log(response);
 
       if (response.error) {
         // Handle token request failure
         res.redirect("https://github.com/evxiong/notion-movies");
         return;
       }
-      // Write user info to MongoDB
+      // Write connection info to MongoDB
       const users = client.db("notion").collection("users");
-      const result = await users.insertOne(response); // should change to upsert?
-      console.log(`Inserted new document with _id: ${result.insertedId}`);
-      res.send("Auth flow complete");
+
+      // Replace response.owner with user_id = response.owner.user.id
+      const { owner, ...d } = response;
+      d.user_id = owner.user.id;
+
+      // Upsert new connection
+      const result = await users.updateOne(
+        {
+          bot_id: d.bot_id,
+          access_token: d.access_token,
+          duplicated_template_id: d.duplicated_template_id,
+        },
+        d,
+        { upsert: true }
+      );
+      console.log(`Inserted document with _id: ${result.upsertedId}`);
+
+      // Redirect to newly created page
+      console.log("Auth flow complete");
+      const notion = new Client({ auth: d.access_token });
+      const url = await getNotionPageUrl(
+        notion,
+        d.duplicated_template_id as string
+      );
+      if (url) {
+        res.redirect(url);
+      } else {
+        res.send(
+          "Auth flow complete. The movie tracker should now be in your Notion workspace."
+        );
+      }
     }
   } catch (e) {
     console.error(e);

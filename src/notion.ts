@@ -96,16 +96,18 @@ export async function updateNotionMovie(
     await notion.pages.update({
       page_id: pageId,
       properties: {
-        Runtime: {
-          rich_text: [
-            {
-              type: "text",
-              text: {
-                content: m.runtime,
+        ...(m.runtime !== "0h 0m" && {
+          Runtime: {
+            rich_text: [
+              {
+                type: "text",
+                text: {
+                  content: m.runtime,
+                },
               },
-            },
-          ],
-        },
+            ],
+          },
+        }),
         "Info Added": {
           checkbox: true,
         },
@@ -129,6 +131,20 @@ export async function getNotionDatabaseId(
       (r) => r.type === "child_database"
     )?.id;
     return databaseId ?? null;
+  } catch (e) {
+    console.error(e);
+  }
+  return null;
+}
+
+export async function getNotionPageUrl(
+  notion: Client,
+  pageId: string
+): Promise<string | null> {
+  try {
+    const response = await notion.pages.retrieve({ page_id: pageId });
+    const url = (response as any).url as string;
+    return url;
   } catch (e) {
     console.error(e);
   }
