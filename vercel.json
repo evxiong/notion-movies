@@ -1,0 +1,8 @@
+{
+  "builds": [
+    {
+      "src": "src/server.ts",
+      "use": "@vercel/node"
+    }
+  ]
+}
