@@ -20,6 +20,13 @@ app.get("/", (req, res) => {
   res.send("notion-movies server is working");
 });
 
+app.get("/connect", (req, res) => {
+  console.log("Received /connect GET request");
+  res.redirect(
+    "https://api.notion.com/v1/oauth/authorize?client_id=15fd872b-594c-81b8-8db1-00373cdd4f34&response_type=code&owner=user&redirect_uri=https%3A%2F%2Fnotion-movies.vercel.app%2Fauth"
+  );
+});
+
 app.post("/", async (req, res) => {
   // Process POST requests from webhook
   console.log("Received POST request");
@@ -112,6 +119,7 @@ app.get("/auth", async (req, res) => {
       // Replace response.owner with user_id = response.owner.user.id
       const { owner, ...d } = response;
       d.user_id = owner.user.id;
+      d.timestamp = new Date();
 
       // Replace or insert new connection
       const result = await users.replaceOne(
