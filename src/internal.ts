@@ -1,16 +1,26 @@
 import { Client } from "@notionhq/client";
 import dotenv from "dotenv";
 import { getMovieInfo } from "./tmdb";
-import { getNotionMovies, updateNotionMovie } from "./notion";
+import {
+  getNotionDatabaseId,
+  getNotionMovies,
+  updateNotionMovie,
+} from "./notion";
 
 dotenv.config();
 
 async function runInternalIntegration() {
   const notion = new Client({ auth: process.env.NOTION_KEY });
-  const results = await getNotionMovies(
+
+  const databaseId = await getNotionDatabaseId(
     notion,
-    process.env.NOTION_DATABASE_ID!
+    process.env.NOTION_PAGE_ID!
   );
+  if (databaseId === null) {
+    return false;
+  }
+
+  const results = await getNotionMovies(notion, databaseId);
   if (results === null) {
     return;
   }

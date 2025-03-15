@@ -1,6 +1,7 @@
 import type { Client } from "@notionhq/client";
 import type {
   BlockObjectResponse,
+  DatabaseObjectResponse,
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints";
 import type { MovieInfo, NotionMovie } from "./types";
@@ -146,6 +147,29 @@ export async function getNotionPageUrl(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const url = (response as any).url as string;
     return url;
+  } catch (e) {
+    console.error(e);
+  }
+  return null;
+}
+
+export async function getNotionPageIds(
+  notion: Client
+): Promise<string[] | null> {
+  try {
+    const response = await notion.search({
+      filter: {
+        value: "database",
+        property: "object",
+      },
+    });
+    const pageIds: string[] = [];
+    for (const r of response.results as DatabaseObjectResponse[]) {
+      if (r.parent.type === "page_id") {
+        pageIds.push(r.parent.page_id);
+      }
+    }
+    return pageIds;
   } catch (e) {
     console.error(e);
   }

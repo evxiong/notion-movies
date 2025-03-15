@@ -2,7 +2,7 @@ import express from "express";
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
 import { runPublicIntegration } from "./public";
-import { getNotionPageUrl } from "./notion";
+import { getNotionPageIds, getNotionPageUrl } from "./notion";
 import { Client } from "@notionhq/client";
 
 dotenv.config();
@@ -47,7 +47,7 @@ app.post("/", async (req, res) => {
     const users = client.db("notion").collection("users");
     const user = await users.findOne({
       user_id: userId,
-      duplicated_template_id: pageId,
+      page_ids: pageId,
     });
     if (user === null) {
       res
@@ -121,12 +121,15 @@ app.get("/auth", async (req, res) => {
       d.user_id = owner.user.id;
       d.timestamp = new Date();
 
+      const notion = new Client({ auth: d.access_token });
+      const pageIds = await getNotionPageIds(notion);
+      d.page_ids = pageIds;
+
       // Replace or insert new connection
       const result = await users.replaceOne(
         {
           bot_id: d.bot_id,
           access_token: d.access_token,
-          duplicated_template_id: d.duplicated_template_id,
         },
         d,
         { upsert: true }
@@ -135,17 +138,14 @@ app.get("/auth", async (req, res) => {
 
       // Redirect to newly created page
       console.log("Auth flow complete");
-      const notion = new Client({ auth: d.access_token });
-      const url = await getNotionPageUrl(
-        notion,
-        d.duplicated_template_id as string
-      );
+      const url =
+        pageIds && pageIds.length > 0
+          ? await getNotionPageUrl(notion, pageIds[0])
+          : null;
       if (url) {
         res.redirect(url);
       } else {
-        res.send(
-          "Auth flow complete. The movie tracker should now be in your Notion workspace."
-        );
+        res.redirect("https://www.notion.so");
       }
     }
   } catch (e) {
