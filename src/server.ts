@@ -47,7 +47,14 @@ app.post("/", async (req, res) => {
     const users = client.db("notion").collection("users");
     const user = await users.findOne({
       user_id: userId,
-      page_ids: pageId,
+      $or: [
+        {
+          duplicated_template_id: pageId,
+        },
+        {
+          page_ids: pageId,
+        },
+      ],
     });
     if (user === null) {
       res
@@ -121,6 +128,8 @@ app.get("/auth", async (req, res) => {
       d.user_id = owner.user.id;
       d.timestamp = new Date();
 
+      // pageIds won't always contain newly created page
+      // https://developers.notion.com/reference/search-optimizations-and-limitations
       const notion = new Client({ auth: d.access_token });
       const pageIds = await getNotionPageIds(notion);
       d.page_ids = pageIds;
@@ -138,10 +147,9 @@ app.get("/auth", async (req, res) => {
 
       // Redirect to newly created page
       console.log("Auth flow complete");
-      const url =
-        pageIds && pageIds.length > 0
-          ? await getNotionPageUrl(notion, pageIds[0])
-          : null;
+      const url = d.duplicated_template_id
+        ? await getNotionPageUrl(notion, d.duplicated_template_id)
+        : null;
       if (url) {
         res.redirect(url);
       } else {
