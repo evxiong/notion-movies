@@ -140,7 +140,7 @@ to manually run a Node script to fetch data.
 6. Install dependencies:
 
    ```shell
-   npm ci --omit=dev
+   npm ci
    ```
 
 7. Create a `.env` file in the root project directory (at the same level as this
