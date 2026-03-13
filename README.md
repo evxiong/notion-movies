@@ -186,4 +186,5 @@ The internal integration runs completely locally on your machine.
 
 ## Tools used
 
-TypeScript, Node.js, Express.js, TMDB API, Notion SDK for JavaScript
+TypeScript, Node.js, Express.js, Puppeteer, TMDB API, Notion SDK for JavaScript,
+MongoDB, Docker
