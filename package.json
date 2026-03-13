@@ -19,14 +19,19 @@
     "@types/jsdom": "^21.1.7",
     "eslint": "^9.22.0",
     "globals": "^16.0.0",
+    "puppeteer": "^24.34.0",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.26.1"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.16",
+    "@sparticuz/chromium": "^143.0.4",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsdom": "^26.0.0",
-    "mongodb": "^6.14.2"
+    "mongodb": "^6.14.2",
+    "puppeteer-core": "^24.34.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
   }
 }

@@ -1,11 +1,24 @@
 import { getIMDbPoster } from "./imdb";
-import type { MovieInfo, TMDBMovieResponse, TMDBSearchResponse } from "./types";
+import type {
+  MovieInfo,
+  Session,
+  TMDBMovieResponse,
+  TMDBSearchResponse,
+} from "./types";
 
+/**
+ * Gets movie info.
+ * @param title Movie title
+ * @param year Movie year
+ * @param session Session object containing Puppeteer objects
+ * @returns Movie runtime (from TMDB) and poster URL (from IMDb, using TMDB as
+ * fallback), or null if error
+ */
 export async function getMovieInfo(
   title: string,
-  year: number
+  year: number,
+  session: Session
 ): Promise<MovieInfo | null> {
-  // Get TMDB runtime and poster.
   const searchUrl = `https://api.themoviedb.org/3/search/movie?query=${title}&include_adult=false&language=en-US&primary_release_year=${year}&page=1&api_key=${process.env.TMDB_API_KEY}`;
 
   try {
@@ -26,7 +39,7 @@ export async function getMovieInfo(
     const h = (mins / 60) >> 0;
 
     // Get IMDb poster link
-    const imdbPosterLink = await getIMDbPoster(movieResponse.imdb_id);
+    const imdbPosterLink = await getIMDbPoster(movieResponse.imdb_id, session);
 
     // Return MovieInfo object
     const movie: MovieInfo = {

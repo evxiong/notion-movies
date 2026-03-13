@@ -6,11 +6,13 @@ import type {
 } from "@notionhq/client/build/src/api-endpoints";
 import type { MovieInfo, NotionMovie } from "./types";
 
+/**
+ * Gets all pages in Notion db.
+ */
 export async function getNotionMovies(
   notion: Client,
   databaseId: string
 ): Promise<NotionMovie[] | null> {
-  // Get all pages in Notion db.
   try {
     const results: NotionMovie[] = [];
     let nextCursor: string | undefined = undefined;
@@ -70,12 +72,14 @@ export async function getNotionMovies(
   return null;
 }
 
+/**
+ * Updates movie page's images, runtime, info added.
+ */
 export async function updateNotionMovie(
   notion: Client,
   pageId: string,
   m: MovieInfo
 ) {
-  // Update page's images, runtime, info added
   try {
     await notion.blocks.children.append({
       block_id: pageId,
@@ -119,11 +123,13 @@ export async function updateNotionMovie(
   }
 }
 
+/**
+ * Gets child database id from top-level page.
+ */
 export async function getNotionDatabaseId(
   notion: Client,
   pageId: string
 ): Promise<string | null> {
-  // Get child database id from top-level page
   try {
     const response = await notion.blocks.children.list({
       block_id: pageId,
@@ -138,6 +144,9 @@ export async function getNotionDatabaseId(
   return null;
 }
 
+/**
+ * Gets page URL from its id.
+ */
 export async function getNotionPageUrl(
   notion: Client,
   pageId: string
@@ -153,6 +162,11 @@ export async function getNotionPageUrl(
   return null;
 }
 
+/**
+ * Gets ids of all pages that contain a database.
+ *
+ * Used in case a user has multiple movie trackers, or has deleted an older one.
+ */
 export async function getNotionPageIds(
   notion: Client
 ): Promise<string[] | null> {

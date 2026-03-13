@@ -1,12 +1,22 @@
 import { JSDOM } from "jsdom";
+import type { Session } from "./types";
 
-export async function getIMDbPoster(imdbId: string): Promise<string | null> {
-  // Get IMDb poster link.
-  const url = `https://www.imdb.com/title/${imdbId}`;
+/**
+ * Gets IMDb poster URL for specified movie.
+ * @param imdbId IMDb id of movie
+ * @param session Session object containing Puppeteer page
+ * @returns IMDb poster URL, or null if error during retrieval
+ */
+export async function getIMDbPoster(
+  imdbId: string,
+  session: Session
+): Promise<string | null> {
+  const url = `https://www.imdb.com/title/${imdbId}/`;
 
   try {
-    const r = await fetch(url);
-    const html = await r.text();
+    await session.page.goto(url, { waitUntil: "domcontentloaded" });
+    await session.page.waitForSelector("#__NEXT_DATA__");
+    const html = await session.page.content();
     const result = new JSDOM(html).window.document.querySelector(
       "script#__NEXT_DATA__"
     )?.textContent;
@@ -24,6 +34,7 @@ export async function getIMDbPoster(imdbId: string): Promise<string | null> {
       posterLinkFull.slice(0, -4) +
       "QL100_UX400,CR1,1,400" +
       posterLinkFull.slice(-4);
+
     return posterLink;
   } catch (e) {
     console.error(e);

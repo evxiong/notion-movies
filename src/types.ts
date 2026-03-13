@@ -1,3 +1,5 @@
+import type { Browser, Page } from "puppeteer";
+
 export interface MovieInfo {
   runtime: string; // ex. "2h 5m"
   posterLink: string; // link to poster
@@ -72,4 +74,12 @@ export interface TMDBMovieResponse {
   video: boolean;
   vote_average: number;
   vote_count: number;
+}
+
+/**
+ * Objects re-used throughout entire request.
+ */
+export interface Session {
+  browser: Browser;
+  page: Page;
 }

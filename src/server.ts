@@ -1,9 +1,9 @@
+import { Client } from "@notionhq/client";
+import dotenv from "dotenv";
 import express from "express";
 import { MongoClient } from "mongodb";
-import dotenv from "dotenv";
-import { runPublicIntegration } from "./public";
 import { getNotionPageIds, getNotionPageUrl } from "./notion";
-import { Client } from "@notionhq/client";
+import { runPublicIntegration } from "./public";
 
 dotenv.config();
 
@@ -27,8 +27,10 @@ app.get("/connect", (req, res) => {
   );
 });
 
+/**
+ * Process POST requests from webhook
+ */
 app.post("/", async (req, res) => {
-  // Process POST requests from webhook
   console.log("Received POST request");
   const payload = req.body;
   const userId = payload.source.user_id;
@@ -67,7 +69,7 @@ app.post("/", async (req, res) => {
 
     // Run script to fetch data
     const accessToken = user.access_token;
-    const result = await runPublicIntegration(pageId, accessToken);
+    const result = await runPublicIntegration(accessToken, pageId);
     if (!result) {
       res
         .status(422)
